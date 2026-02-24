@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investor Wizards | Quantitative Portfolio Dashboards</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* Deep Dark Mode Palette */
+            --bg: #050505;
+            --accent: #4ade80;
+            /* Teal/Neon Green Accent */
+            --text: #ffffff;
+            --muted: #a1a1aa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- THE 3D GEOMETRY BACKGROUND --- */
+        .ambient-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            overflow: hidden;
+            background: #09090b;
+            /* Very dark grey */
+        }
+
+        /* 3D Shaded Spheres */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            /* Smooths the edges slightly to match the reference */
+            filter: blur(3px);
+        }
+
+        /* Teal/Cyan Sphere (Matches your first image) */
+        .orb-1 {
+            width: 50vw;
+            height: 50vw;
+            top: -10%;
+            left: -10%;
+            /* 3D lighting: bright top-left, deep shadow bottom-right */
+            background: radial-gradient(circle at 30% 30%, #4ade80, #0d9488, #042f2e);
+            box-shadow: inset -20px -20px 60px rgba(0, 0, 0, 0.8);
+            animation: float 25s infinite ease-in-out alternate;
+        }
+
+        /* Blue/Purple Sphere */
+        .orb-2 {
+            width: 40vw;
+            height: 40vw;
+            bottom: -10%;
+            right: -5%;
+            background: radial-gradient(circle at 30% 30%, #818cf8, #4338ca, #172554);
+            box-shadow: inset -20px -20px 60px rgba(0, 0, 0, 0.8);
+            animation: float 20s infinite ease-in-out alternate-reverse;
+        }
+
+        /* Magenta/Orange Sphere */
+        .orb-3 {
+            width: 30vw;
+            height: 30vw;
+            top: 30%;
+            left: 40%;
+            background: radial-gradient(circle at 30% 30%, #f472b6, #db2777, #4c0519);
+            box-shadow: inset -15px -15px 40px rgba(0, 0, 0, 0.8);
+            animation: float 30s infinite ease-in-out alternate;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(8vw, 5vh) scale(1.1) rotate(10deg);
+            }
+        }
+
+        /* Ambient Noise Overlay to make it cinematic */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 52px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        p.subtitle {
+            font-family: 'Inter', sans-serif;
+            color: var(--muted);
+            font-size: 13px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 50px;
+            font-weight: 500;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            perspective: 1000px;
+        }
+
+        /* --- THE DARK PRISTINE GLASS --- */
+        .card {
+            background: rgba(255, 255, 255, 0.02);
+            /* Almost invisible base */
+            backdrop-filter: blur(30px) saturate(140%);
+            -webkit-backdrop-filter: blur(30px) saturate(140%);
+            border-radius: 24px;
+            padding: 36px 24px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            /* The crisp white/silver borders from your reference */
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 1px rgba(255, 255, 255, 0.15);
+        }
+
+        /* Soft highlight sweep */
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 100%);
+            transform: skewX(-20deg);
+            transition: all 0.7s ease;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .card:hover::after {
+            left: 200%;
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow:
+                0 30px 60px rgba(0, 0, 0, 0.6),
+                inset 0 1px 2px rgba(255, 255, 255, 0.3);
+        }
+
+        .card-ticker,
+        .card-name,
+        .card-weight {
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-ticker {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 14px;
+            letter-spacing: 0.05em;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+        }
+
+        .card-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 26px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+            letter-spacing: -0.02em;
+        }
+
+        .card-weight {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            color: var(--muted);
+            letter-spacing: 0.01em;
+            font-weight: 400;
+        }
+
+        .footer {
+            margin-top: 60px;
+            color: #71717a;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* --- ENTRANCE ANIMATIONS --- */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            animation: fadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        p.subtitle {
+            animation: fadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation-delay: 0.1s;
+            opacity: 0;
+        }
+
+        .card:nth-child(1) {
+            animation: fadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
+
+        .card:nth-child(2) {
+            animation: fadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation-delay: 0.3s;
+            opacity: 0;
+        }
+
+        .card:nth-child(3) {
+            animation: fadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation-delay: 0.4s;
+            opacity: 0;
+        }
+
+        .card:nth-child(4) {
+            animation: fadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation-delay: 0.5s;
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ambient-canvas">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <h1>Investor Wizards</h1>
+        <p class="subtitle">Quantitative Portfolio Analysis Suite</p>
+
+        <div class="grid">
+            <a href="GOOG_Analysis.html" class="card">
+                <div class="card-ticker">GOOG</div>
+                <div class="card-name">Alphabet Inc.</div>
+                <div class="card-weight">GARP Allocation · 35% Weight</div>
+            </a>
+
+            <a href="ASML_Analysis.html" class="card">
+                <div class="card-ticker">ASML</div>
+                <div class="card-name">ASML Holding NV</div>
+                <div class="card-weight">Growth Allocation · 30% Weight</div>
+            </a>
+
+            <a href="BRK_B_Analysis.html" class="card">
+                <div class="card-ticker">BRK-B</div>
+                <div class="card-name">Berkshire Hathaway</div>
+                <div class="card-weight">Stability Anchor · 20% Weight</div>
+            </a>
+
+            <a href="BA_Analysis.html" class="card">
+                <div class="card-ticker">BA.L</div>
+                <div class="card-name">BAE Systems plc</div>
+                <div class="card-weight">Defense Anchor · 15% Weight</div>
+            </a>
+        </div>
+
+        <div class="footer">
+            Models: Bates SVJ Monte Carlo · Stochastic DCF · P/E Multiple Contraction<br>
+            Strictly for educational and presentation purposes.
+        </div>
+    </div>
+
+    <script>
+        // Keep the 3D Tilt Effect
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -6;
+                const rotateY = ((x - centerX) / centerX) * 6;
+                card.style.transform = `translateY(-4px) scale(1.02) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = `translateY(0) scale(1) rotateX(0) rotateY(0)`;
+            });
+        });
+    </script>
+</body>
+
+</html>
