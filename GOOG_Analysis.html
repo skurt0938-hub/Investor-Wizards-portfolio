@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GOOG — Alphabet Inc. Class C | Financial Analysis Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:wght@300;400;600;700&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      /* Apple Light Mode Palette */
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --surface2: #fafafa;
+      --border: #e5e5ea;
+      --accent: #a68a3f;
+      --accent2: #1d1d1f;
+      --text: #1d1d1f;
+      --muted: #86868b;
+      --green: #34c759;
+      /* Apple System Green */
+      --red: #ff3b30;
+      /* Apple System Red */
+      --blue: #007aff;
+      /* Apple System Blue */
+      --gold-glow: rgba(166, 138, 63, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      padding: 32px 0 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .ticker-badge {
+      background: rgba(166, 138, 63, 0.15);
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+      font-weight: 600;
+      font-size: 15px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      letter-spacing: 0.05em;
+    }
+
+    .company-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .header-meta {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      margin-top: 2px;
+    }
+
+    .price-display {
+      text-align: right;
+    }
+
+    .price-display .price {
+      font-size: 32px;
+      font-weight: 500;
+      color: var(--accent2);
+      letter-spacing: -0.02em;
+    }
+
+    .price-display .price-date {
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 2px;
+    }
+
+    /* Segmented Control Style Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-top: 24px;
+      background: #e3e3e8;
+      padding: 4px;
+      border-radius: 10px;
+      width: fit-content;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      padding: 10px 20px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .tab-panel {
+      display: none;
+      padding: 32px 0;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    /* Soft Apple Cards */
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent);
+      opacity: 0.8;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .stat-sub {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 6px;
+    }
+
+    .stat-card.green::before {
+      background: var(--green);
+    }
+
+    .stat-card.red::before {
+      background: var(--red);
+    }
+
+    .stat-card.blue::before {
+      background: var(--blue);
+    }
+
+    .chart-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    }
+
+    .chart-title {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    .params-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .param-group {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    }
+
+    .param-label {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.02em;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .param-input {
+      background: #f5f5f7;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      padding: 8px 12px;
+      width: 100%;
+      transition: all 0.2s;
+    }
+
+    .param-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px var(--gold-glow);
+    }
+
+    /* --- PREMIUM 3D GLASS BUTTONS --- */
+    .btn-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .btn {
+      position: relative;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 14px;
+      color: #1d1d1f;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 12px 28px;
+      cursor: pointer;
+      overflow: hidden;
+      z-index: 1;
+      transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.04),
+        inset 0 1px 2px rgba(255, 255, 255, 1),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.02);
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, hsl(223, 90%, 55%), hsl(208, 90%, 45%));
+      opacity: 0.08;
+      z-index: -1;
+      transition: opacity 0.4s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      border-color: rgba(0, 122, 255, 0.4);
+      color: #005bb5;
+      box-shadow:
+        0 14px 40px rgba(0, 122, 255, 0.15),
+        inset 0 1px 2px rgba(255, 255, 255, 1);
+    }
+
+    .btn:hover::before {
+      opacity: 0.25;
+    }
+
+    .btn:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow:
+        0 4px 12px rgba(0, 122, 255, 0.1),
+        inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-outline::before {
+      background: linear-gradient(135deg, hsl(0, 0%, 80%), hsl(0, 0%, 60%));
+    }
+
+    .btn-outline:hover {
+      border-color: rgba(0, 0, 0, 0.1);
+      color: #1d1d1f;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.06), inset 0 1px 2px rgba(255, 255, 255, 1);
+    }
+
+    /* Progress Bar */
+    .progress-wrap {
+      margin: 16px 0;
+    }
+
+    .progress-bar-bg {
+      background: #e5e5ea;
+      border-radius: 6px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      background: var(--accent);
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.1s;
+      width: 0%;
+    }
+
+    .progress-text {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 8px;
+      font-weight: 500;
+    }
+
+    /* Table */
+    .data-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 12px;
+    }
+
+    .data-table th {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      padding: 12px 16px;
+      text-align: left;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .data-table td {
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 16px;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr:hover td {
+      background: var(--surface2);
+    }
+
+    /* Tags */
+    .tag {
+      border-radius: 6px;
+      font-size: 10px;
+      padding: 4px 10px;
+      letter-spacing: 0.02em;
+      font-weight: 500;
+    }
+
+    .tag-bear {
+      background: rgba(255, 59, 48, 0.1);
+      color: var(--red);
+    }
+
+    .tag-base {
+      background: rgba(166, 138, 63, 0.1);
+      color: var(--accent);
+    }
+
+    .tag-bull {
+      background: rgba(52, 199, 89, 0.1);
+      color: var(--green);
+    }
+
+    .tag-strong {
+      background: rgba(0, 122, 255, 0.1);
+      color: var(--blue);
+    }
+
+    /* Toggles */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle {
+      appearance: none;
+      background: #e5e5ea;
+      border-radius: 14px;
+      cursor: pointer;
+      height: 24px;
+      position: relative;
+      transition: background 0.3s;
+      width: 44px;
+    }
+
+    .toggle:checked {
+      background: var(--green);
+    }
+
+    .toggle::after {
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      content: '';
+      height: 20px;
+      left: 2px;
+      position: absolute;
+      top: 2px;
+      transition: left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      width: 20px;
+    }
+
+    .toggle:checked::after {
+      left: 22px;
+    }
+
+    .footer {
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.6;
+      margin-top: 60px;
+      padding: 32px 0;
+      text-align: center;
+    }
+
+    /* PDF EXPORT (Keep as is) */
+    #pdf-export-container {
+      display: none;
+      background: #fff;
+      color: #111;
+      font-family: 'DM Mono', monospace;
+      padding: 40px;
+      width: 794px;
+    }
+
+    .pdf-page {
+      page-break-after: always;
+      padding: 20px 0;
+    }
+
+    .pdf-cover-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 36px;
+      font-weight: 600;
+      color: #111;
+      margin-bottom: 8px;
+    }
+
+    .pdf-cover-sub {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .pdf-section-title {
+      font-size: 14px;
+      font-weight: 500;
+      border-bottom: 2px solid #c9a84c;
+      padding-bottom: 6px;
+      margin: 20px 0 14px;
+    }
+
+    .pdf-stat {
+      display: inline-block;
+      background: #f5f5f0;
+      border-radius: 4px;
+      padding: 10px 16px;
+      margin: 6px;
+      text-align: center;
+    }
+
+    .pdf-stat-val {
+      font-size: 20px;
+      font-weight: 500;
+      color: #111;
+    }
+
+    .pdf-stat-lbl {
+      font-size: 10px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .pdf-footer {
+      color: #999;
+      font-size: 9px;
+      margin-top: 30px;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <div class="ticker-badge">GOOG</div>
+        <div>
+          <div class="company-name">Alphabet Inc. Class C</div>
+          <div class="header-meta">NASDAQ · Technology / Digital Advertising + Cloud · Feb 20, 2026</div>
+        </div>
+      </div>
+      <div class="price-display">
+        <div class="price">$315.00</div>
+        <div class="price-date">Close · Feb 20, 2026</div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('svj')">① Bates SVJ Monte Carlo</button>
+      <button class="tab-btn" onclick="switchTab('dcf')">② Stochastic DCF</button>
+      <button class="tab-btn" onclick="switchTab('pe')">③ P/E Stress Test</button>
+    </div>
+
+    <div id="tab-svj" class="tab-panel active">
+      <div class="section">
+        <div class="section-title">Bates SVJ Model Parameters</div>
+        <div class="params-grid">
+          <div class="param-group">
+            <div class="param-label">S₀ — Initial Price ($)</div><input class="param-input" id="p-s0" value="315.00">
+          </div>
+          <div class="param-group">
+            <div class="param-label">V₀ — Initial Variance</div><input class="param-input" id="p-v0" value="0.048">
+          </div>
+          <div class="param-group">
+            <div class="param-label">θ — Long-run Variance</div><input class="param-input" id="p-theta" value="0.045">
+          </div>
+          <div class="param-group">
+            <div class="param-label">κ — Mean Reversion Speed</div><input class="param-input" id="p-kappa" value="2.2">
+          </div>
+          <div class="param-group">
+            <div class="param-label">ξ — Vol of Vol</div><input class="param-input" id="p-xi" value="0.40">
+          </div>
+          <div class="param-group">
+            <div class="param-label">ρ — Price-Vol Correlation</div><input class="param-input" id="p-rho" value="-0.65">
+          </div>
+          <div class="param-group">
+            <div class="param-label">λ — Jump Frequency (/yr)</div><input class="param-input" id="p-lambda"
+              value="0.45">
+          </div>
+          <div class="param-group">
+            <div class="param-label">μⱼ — Mean Jump Size</div><input class="param-input" id="p-muj" value="-0.09">
+          </div>
+          <div class="param-group">
+            <div class="param-label">σⱼ — Jump Volatility</div><input class="param-input" id="p-sigj" value="0.14">
+          </div>
+          <div class="param-group">
+            <div class="param-label">μ Flat Drift</div><input class="param-input" id="p-mu-flat" value="0.115">
+          </div>
+          <div class="param-group">
+            <div class="param-label">Phase 1 Drift (Yr 1-3)</div><input class="param-input" id="p-mu1" value="0.140">
+          </div>
+          <div class="param-group">
+            <div class="param-label">Phase 2 Drift (Yr 4-6)</div><input class="param-input" id="p-mu2" value="0.110">
+          </div>
+          <div class="param-group">
+            <div class="param-label">Phase 3 Drift (Yr 7-10)</div><input class="param-input" id="p-mu3" value="0.080">
+          </div>
+          <div class="param-group">
+            <div class="param-label">T — Horizon (years)</div><input class="param-input" id="p-T" value="10">
+          </div>
+          <div class="param-group">
+            <div class="param-label">N — Simulations</div><input class="param-input" id="p-N" value="1000000">
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="btn-row">
+          <div class="toggle-wrap"><input type="checkbox" class="toggle" id="decay-toggle" checked><label
+              for="decay-toggle" style="color:var(--muted);font-size:11px;">Growth Decay Schedule</label></div>
+          <button class="btn" id="run-svj-btn" onclick="runSVJ()">▶ Run Simulation (1M Paths)</button>
+          <button class="btn btn-outline" onclick="exportPDF()">⬇ Export PDF</button>
+        </div>
+        <div class="progress-wrap" id="svj-progress" style="display:none">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="svj-progress-fill"></div>
+          </div>
+          <div class="progress-text" id="svj-progress-text">Initializing...</div>
+        </div>
+        <div style="color:var(--muted);font-size:11px;margin-bottom:12px;">⚠ 1,000,000 paths · ~60–120 seconds. GOOG
+          realized vol ~22%.</div>
+      </div>
+      <div class="section" id="svj-results" style="display:none">
+        <div class="section-title">Simulation Results</div>
+        <div class="stat-grid" id="svj-stats"></div>
+        <div class="chart-wrap">
+          <div class="chart-title">Terminal Price Distribution — Year 10</div>
+          <div style="height:280px"><canvas id="chart-hist"></canvas></div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title">100 Sample Price Paths</div>
+          <div style="height:260px"><canvas id="chart-paths"></canvas></div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title">Mean Path Comparison</div>
+          <div style="height:220px"><canvas id="chart-median"></canvas></div>
+        </div>
+        <div class="section-title" style="margin-top:24px">Percentile Table</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden">
+          <table class="data-table" id="svj-pct-table">
+            <thead>
+              <tr>
+                <th>Percentile</th>
+                <th>Final Price</th>
+                <th>Total Return</th>
+                <th>Ann. Return/yr</th>
+                <th>Scenario</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-dcf" class="tab-panel">
+      <div class="section">
+        <div class="section-title">Stochastic DCF Parameters</div>
+        <div class="params-grid">
+          <div class="param-group">
+            <div class="param-label">Revenue TTM ($B)</div><input class="param-input" id="d-rev" value="403.0">
+          </div>
+          <div class="param-group">
+            <div class="param-label">Shares Out (B)</div><input class="param-input" id="d-shares" value="12.3">
+          </div>
+          <div class="param-group">
+            <div class="param-label">μ_g — Rev Growth Mean</div><input class="param-input" id="d-mg" value="0.12">
+          </div>
+          <div class="param-group">
+            <div class="param-label">σ_g — Rev Growth Stdev</div><input class="param-input" id="d-sg" value="0.04">
+          </div>
+          <div class="param-group">
+            <div class="param-label">μ_margin — Net Margin</div><input class="param-input" id="d-mm" value="0.33">
+          </div>
+          <div class="param-group">
+            <div class="param-label">σ_margin</div><input class="param-input" id="d-sm" value="0.03">
+          </div>
+          <div class="param-group">
+            <div class="param-label">μ_fcf — FCF/NI Conversion</div><input class="param-input" id="d-mf" value="0.88">
+          </div>
+          <div class="param-group">
+            <div class="param-label">σ_fcf</div><input class="param-input" id="d-sf" value="0.07">
+          </div>
+          <div class="param-group">
+            <div class="param-label">μ_wacc — WACC Mean</div><input class="param-input" id="d-mw" value="0.090">
+          </div>
+          <div class="param-group">
+            <div class="param-label">σ_wacc</div><input class="param-input" id="d-sw" value="0.012">
+          </div>
+          <div class="param-group">
+            <div class="param-label">μ_tg — Terminal Growth</div><input class="param-input" id="d-mtg" value="0.035">
+          </div>
+          <div class="param-group">
+            <div class="param-label">σ_tg</div><input class="param-input" id="d-stg" value="0.006">
+          </div>
+
+          <div class="param-group">
+            <div class="param-label">φ_g — AR(1) Growth Inertia</div><input class="param-input" id="d-phi-g"
+              value="0.70">
+          </div>
+          <div class="param-group">
+            <div class="param-label">Net Cash ($B)</div><input class="param-input" id="d-netcash" value="100.0">
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="btn-row"><button class="btn" id="run-dcf-btn" onclick="runDCF()">▶ Run DCF (100K Paths)</button>
+        </div>
+        <div class="progress-wrap" id="dcf-progress" style="display:none">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="dcf-progress-fill"></div>
+          </div>
+          <div class="progress-text" id="dcf-progress-text">Running...</div>
+        </div>
+      </div>
+      <div class="section" id="dcf-results" style="display:none">
+        <div class="section-title">DCF Results</div>
+        <div class="stat-grid" id="dcf-stats"></div>
+        <div class="chart-wrap">
+          <div class="chart-title">Intrinsic Value Distribution (100K Simulations)</div>
+          <div style="height:260px"><canvas id="chart-dcf-hist"></canvas></div>
+        </div>
+        <div class="section-title">Percentile Table</div>
+        <div
+          style="background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:24px">
+          <table class="data-table" id="dcf-pct-table">
+            <thead>
+              <tr>
+                <th>Percentile</th>
+                <th>Intrinsic Value / Share</th>
+                <th>vs Current Price</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="section-title">Sensitivity — Tornado Chart</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:20px"
+          id="tornado-chart"></div>
+      </div>
+    </div>
+
+    <div id="tab-pe" class="tab-panel">
+      <div class="section">
+        <div class="section-title">P/E Stress Test Parameters</div>
+        <div class="params-grid">
+          <div class="param-group">
+            <div class="param-label">Current P/E</div><input class="param-input" id="pe-cur" value="29.2">
+          </div>
+          <div class="param-group">
+            <div class="param-label">Bear P/E Target</div><input class="param-input" id="pe-bear" value="14.0">
+          </div>
+          <div class="param-group">
+            <div class="param-label">Base P/E Target</div><input class="param-input" id="pe-base" value="20.0">
+          </div>
+          <div class="param-group">
+            <div class="param-label">Bull P/E Target</div><input class="param-input" id="pe-bull" value="28.0">
+          </div>
+          <div class="param-group">
+            <div class="param-label">κ_pe — Mean Reversion</div><input class="param-input" id="pe-kappa" value="0.22">
+          </div>
+          <div class="param-group">
+            <div class="param-label">σ_pe — P/E Vol/yr</div><input class="param-input" id="pe-sig" value="3.0">
+          </div>
+          <div class="param-group">
+            <div class="param-label">μ_eps — EPS Growth</div><input class="param-input" id="pe-meps" value="0.12">
+          </div>
+          <div class="param-group">
+            <div class="param-label">σ_eps — EPS Growth Stdev</div><input class="param-input" id="pe-seps" value="0.05">
+          </div>
+          <div class="param-group">
+            <div class="param-label">EPS TTM ($)</div><input class="param-input" id="pe-eps0" value="10.80">
+          </div>
+
+          <div class="param-group">
+            <div class="param-label">ρ — P/E & EPS Correlation</div><input class="param-input" id="pe-rho" value="0.65">
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="btn-row"><button class="btn" id="run-pe-btn" onclick="runPE()">▶ Run P/E Stress (50K Paths)</button>
+        </div>
+        <div class="progress-wrap" id="pe-progress" style="display:none">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="pe-progress-fill"></div>
+          </div>
+          <div class="progress-text" id="pe-progress-text">Running...</div>
+        </div>
+      </div>
+      <div class="section" id="pe-results" style="display:none">
+        <div class="section-title">P/E Stress Test Results</div>
+        <div class="chart-wrap">
+          <div class="chart-title">Year-10 Price Distribution — Bear / Base / Bull</div>
+          <div style="height:260px"><canvas id="chart-pe-hist"></canvas></div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title">Median Price Path — Bear / Base / Bull</div>
+          <div style="height:220px"><canvas id="chart-pe-paths"></canvas></div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title">Mean P/E Path ± 1σ</div>
+          <div style="height:200px"><canvas id="chart-pe-ratio"></canvas></div>
+        </div>
+        <div class="section-title">Scenario Summary</div>
+        <div
+          style="background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:20px">
+          <table class="data-table" id="pe-summary-table">
+            <thead>
+              <tr>
+                <th>Scenario</th>
+                <th>Median Price</th>
+                <th>Total Return</th>
+                <th>Ann. Return</th>
+                <th>% Profitable</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title">EPS Projection — Median with 10th–90th Percentile Band</div>
+          <div style="height:200px"><canvas id="chart-eps"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">⚠ FOR EDUCATIONAL USE ONLY — Investment-Wizards Portfolio Analysis · Feb 2026. Models: Bates SVJ
+      (Heston stochastic variance + Poisson jump diffusion, full-truncation Euler-Maruyama, weekly steps,
+      martingale-corrected drift), Stochastic DCF (Monte Carlo on revenue growth, margin, WACC, and terminal growth),
+      P/E Multiple Contraction (mean-reverting P/E with stochastic EPS growth). This is not financial advice. Past
+      performance does not predict future results.</div>
+  </div>
+
+  <div id="pdf-export-container">
+    <div class="pdf-page">
+      <div class="pdf-cover-title">GOOG — Alphabet Inc. Class C</div>
+      <div class="pdf-cover-sub">NASDAQ · Technology / Digital Advertising + Cloud</div>
+      <div class="pdf-cover-sub">Data Date: February 20, 2026 · Price: $315.00</div>
+      <div class="pdf-cover-sub" style="margin-top:16px;font-size:12px">Models Included:</div>
+      <div class="pdf-cover-sub">1. Bates SVJ Monte Carlo (1,000,000 iterations, 10-year horizon)</div>
+      <div class="pdf-cover-sub">2. Stochastic DCF (100,000 simulations, 10-year projection)</div>
+      <div class="pdf-cover-sub">3. P/E Multiple Contraction Stress Test (50,000 paths, 3 scenarios)</div>
+      <div class="pdf-footer">FOR EDUCATIONAL USE ONLY — Not financial advice.</div>
+    </div>
+    <div class="pdf-page">
+      <div class="pdf-section-title">Model 1 — Bates SVJ Monte Carlo</div>
+      <div id="pdf-svj-stats"></div>
+    </div>
+    <div class="pdf-page">
+      <div class="pdf-section-title">Model 2 — Stochastic DCF</div>
+      <div id="pdf-dcf-stats"></div>
+    </div>
+    <div class="pdf-page">
+      <div class="pdf-section-title">Model 3 — P/E Multiple Contraction</div>
+      <div id="pdf-pe-stats"></div>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+    Chart.defaults.color = '#86868b'; Chart.defaults.borderColor = '#e5e5ea'; Chart.defaults.font.family = "'DM Mono', monospace"; Chart.defaults.font.size = 11;
+    const GOLD = '#a68a3f', GREEN = '#34c759', RED = '#ff3b30', BLUE = '#007aff', MUTED = '#86868b';
+    const S0 = 315.00, T = 10;
+    const chartInstances = {};
+    function destroyChart(id) { if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; } }
+    function switchTab(n) { document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', ['svj', 'dcf', 'pe'][i] === n)); document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active')); document.getElementById('tab-' + n).classList.add('active'); }
+    function boxMuller() { let u, v; do { u = Math.random(); v = Math.random(); } while (u === 0 || v === 0); const m = Math.sqrt(-2 * Math.log(u)); return [m * Math.cos(2 * Math.PI * v), m * Math.sin(2 * Math.PI * v)]; }
+    function poissonDraw(lam) { if (lam < 1e-4) return Math.random() < lam ? 1 : 0; const L = Math.exp(-lam); let k = 0, p = 1; do { k++; p *= Math.random(); } while (p > L); return k - 1; }
+    function clip(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+    function sortedPercentile(s, p) { const n = s.length, idx = (p / 100) * (n - 1), lo = Math.floor(idx), hi = Math.ceil(idx); if (lo === hi) return s[lo]; return s[lo] + (s[hi] - s[lo]) * (idx - lo); }
+    function fmt$(v) { return '$' + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+    function fmtPct(v) { return (v >= 0 ? '+' : '') + (v * 100).toFixed(1) + '%'; }
+    function fmtAnn(v) { return (v >= 0 ? '+' : '') + (v * 100).toFixed(2) + '%'; }
+
+    let svjResults = null;
+    async function runSVJ() {
+      const btn = document.getElementById('run-svj-btn'); btn.disabled = true;
+      const s0 = +document.getElementById('p-s0').value, v0 = +document.getElementById('p-v0').value, theta = +document.getElementById('p-theta').value, kappa = +document.getElementById('p-kappa').value;
+      const xi = +document.getElementById('p-xi').value, rho = +document.getElementById('p-rho').value, lam = +document.getElementById('p-lambda').value;
+      const muJ = +document.getElementById('p-muj').value, sigJ = +document.getElementById('p-sigj').value;
+      const muFlat = +document.getElementById('p-mu-flat').value, mu1 = +document.getElementById('p-mu1').value, mu2 = +document.getElementById('p-mu2').value, mu3 = +document.getElementById('p-mu3').value;
+      const Tyrs = +document.getElementById('p-T').value, N = +document.getElementById('p-N').value, useDecay = document.getElementById('decay-toggle').checked;
+      const dt = 1 / 52, steps = Math.round(Tyrs * 52), batchSize = 5000;
+      const kBar = Math.exp(muJ + 0.5 * sigJ * sigJ) - 1, jumpComp = lam * kBar, sqrtDt = Math.sqrt(dt), rho2 = Math.sqrt(1 - rho * rho);
+      const sp500Target = s0 * Math.pow(1.08, Tyrs);
+      const terminals = new Float64Array(N);
+      const displaySteps = Math.min(steps, 104), stride = steps / displaySteps;
+      const samplePaths = [], sampleN = 100;
+      document.getElementById('svj-progress').style.display = 'block'; document.getElementById('svj-results').style.display = 'none';
+      const progFill = document.getElementById('svj-progress-fill'), progText = document.getElementById('svj-progress-text');
+      for (let b = 0; b < Math.ceil(N / batchSize); b++) {
+        const start = b * batchSize, end = Math.min(start + batchSize, N);
+        for (let i = start; i < end; i++) {
+          let lnS = Math.log(s0), V = v0; const isample = i < sampleN; const path = isample ? new Float32Array(displaySteps + 1) : null; if (isample) path[0] = s0; let pdx = 1;
+          for (let step = 0; step < steps; step++) {
+            let mu; if (useDecay) { const yr = step * dt; mu = yr < 3 ? mu1 : yr < 6 ? mu2 : mu3; } else mu = muFlat;
+            const Vp = Math.max(V, 0), sqrtV = Math.sqrt(Vp);
+            const [z1, zIndep] = boxMuller(), z2 = rho * z1 + rho2 * zIndep;
+            const nJ = poissonDraw(lam * dt); let jumpSum = 0; for (let j = 0; j < nJ; j++) { const [jz] = boxMuller(); jumpSum += muJ + sigJ * jz; }
+            lnS += (mu - 0.5 * Vp - jumpComp) * dt + sqrtV * z1 * sqrtDt + jumpSum; V += kappa * (theta - Vp) * dt + xi * sqrtV * z2 * sqrtDt;
+            if (isample && step >= pdx * stride - 1) { path[pdx] = Math.exp(lnS); pdx = Math.min(pdx + 1, displaySteps); }
+          }
+          terminals[i] = Math.exp(lnS); if (isample) samplePaths.push(path);
+        }
+        const pct = (end / N * 100).toFixed(1); progFill.style.width = pct + '%'; progText.textContent = `Running… ${end.toLocaleString()} / ${N.toLocaleString()} (${pct}%)`;
+        await new Promise(r => setTimeout(r, 0));
+      }
+      terminals.sort();
+      const compN = 5000, compBatch = 500, pts = displaySteps + 1, flatSums = new Float64Array(pts), decaySums = new Float64Array(pts);
+      flatSums[0] = s0; decaySums[0] = s0;
+      for (let cb = 0; cb < Math.ceil(compN / compBatch); cb++) {
+        const cStart = cb * compBatch, cEnd = Math.min(cStart + compBatch, compN);
+        for (let i = cStart; i < cEnd; i++) {
+          let lnSF = Math.log(s0), VF = v0, lnSD = Math.log(s0), VD = v0, pdxF = 1, pdxD = 1;
+          const pF = new Float32Array(pts), pD = new Float32Array(pts); pF[0] = s0; pD[0] = s0;
+          for (let step = 0; step < steps; step++) {
+            const yr = step * dt, muD = yr < 3 ? mu1 : yr < 6 ? mu2 : mu3, VpF = Math.max(VF, 0), VpD = Math.max(VD, 0);
+            const [z1f, zi1] = boxMuller(), [z1d, zi2] = boxMuller(), z2f = rho * z1f + rho2 * zi1, z2d = rho * z1d + rho2 * zi2;
+            const nJF = poissonDraw(lam * dt), nJD = poissonDraw(lam * dt); let jsF = 0, jsD = 0;
+            for (let j = 0; j < nJF; j++) { const [jz] = boxMuller(); jsF += muJ + sigJ * jz; } for (let j = 0; j < nJD; j++) { const [jz] = boxMuller(); jsD += muJ + sigJ * jz; }
+            lnSF += (muFlat - 0.5 * VpF - jumpComp) * dt + Math.sqrt(VpF) * z1f * sqrtDt + jsF; lnSD += (muD - 0.5 * VpD - jumpComp) * dt + Math.sqrt(VpD) * z1d * sqrtDt + jsD;
+            VF += kappa * (theta - VpF) * dt + xi * Math.sqrt(VpF) * z2f * sqrtDt; VD += kappa * (theta - VpD) * dt + xi * Math.sqrt(VpD) * z2d * sqrtDt;
+            if (step >= pdxF * stride - 1) { pF[pdxF] = Math.exp(lnSF); pdxF = Math.min(pdxF + 1, displaySteps); }
+            if (step >= pdxD * stride - 1) { pD[pdxD] = Math.exp(lnSD); pdxD = Math.min(pdxD + 1, displaySteps); }
+          }
+          for (let p = 0; p < pts; p++) { flatSums[p] += pF[p]; decaySums[p] += pD[p]; }
+        }
+        await new Promise(r => setTimeout(r, 0));
+      }
+      const flatMedianPath = [], decayMedianPath = [];
+      for (let p = 0; p < pts; p++) { flatMedianPath.push(flatSums[p] / compN); decayMedianPath.push(decaySums[p] / compN); }
+      svjResults = { terminals, samplePaths, s0, sp500Target, Tyrs, displaySteps, stride, flatMedianPath, decayMedianPath };
+      renderSVJ(); progFill.style.width = '100%'; progText.textContent = 'Complete!';
+      setTimeout(() => { document.getElementById('svj-progress').style.display = 'none'; }, 1000);
+      document.getElementById('svj-results').style.display = 'block'; btn.disabled = false;
+    }
+
+    function renderSVJ() {
+      const { terminals, samplePaths, s0, sp500Target, Tyrs, displaySteps, flatMedianPath, decayMedianPath } = svjResults;
+      const N = terminals.length, median = sortedPercentile(terminals, 50), mean = terminals.reduce((a, b) => a + b, 0) / N;
+      const pBeatSP = terminals.filter(v => v >= sp500Target).length / N * 100, pBelowS0 = terminals.filter(v => v < s0).length / N * 100;
+      document.getElementById('svj-stats').innerHTML = `<div class="stat-card"><div class="stat-label">Median Final Price</div><div class="stat-value">${fmt$(median)}</div><div class="stat-sub">50th pct · Year ${Tyrs}</div></div><div class="stat-card blue"><div class="stat-label">Mean Final Price</div><div class="stat-value">${fmt$(mean)}</div></div><div class="stat-card green"><div class="stat-label">Beat S&P 8%/yr</div><div class="stat-value">${pBeatSP.toFixed(1)}%</div><div class="stat-sub">Target: ${fmt$(sp500Target)}</div></div><div class="stat-card red"><div class="stat-label">Paths Below S₀</div><div class="stat-value">${pBelowS0.toFixed(1)}%</div></div>`;
+      const p1 = sortedPercentile(terminals, 1), p99 = sortedPercentile(terminals, 99), bins = 60, binW = (p99 - p1) / bins, counts = new Array(bins).fill(0), colors = [];
+      terminals.forEach(v => { if (v < p1 || v > p99) return; const b = Math.min(Math.floor((v - p1) / binW), bins - 1); counts[b]++; });
+      const labels = []; for (let i = 0; i < bins; i++) { const mid = p1 + (i + 0.5) * binW; labels.push(fmt$(mid)); colors.push(mid < s0 ? RED : mid < sp500Target ? GOLD : GREEN); }
+      destroyChart('chart-hist');
+      chartInstances['chart-hist'] = new Chart(document.getElementById('chart-hist'), { type: 'bar', data: { labels, datasets: [{ data: counts, backgroundColor: colors, borderWidth: 0, barPercentage: 1.0, categoryPercentage: 1.0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { maxTicksLimit: 8, color: MUTED }, grid: { display: false } }, y: { ticks: { color: MUTED }, grid: { color: '#e5e5ea' } } } } });
+      const xLabels = []; for (let i = 0; i <= displaySteps; i++)xLabels.push((i / displaySteps * Tyrs).toFixed(1));
+      const pathDs = samplePaths.map(p => ({ data: Array.from(p), borderColor: 'rgba(201,168,76,0.10)', borderWidth: 1, pointRadius: 0, tension: 0.2 }));
+      pathDs.push({ data: xLabels.map(() => s0), borderColor: 'rgba(224,92,92,0.5)', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0 });
+      pathDs.push({ data: xLabels.map((_, i) => s0 * Math.pow(1.08, i / displaySteps * Tyrs)), borderColor: 'rgba(76,175,125,0.5)', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0 });
+      destroyChart('chart-paths');
+      chartInstances['chart-paths'] = new Chart(document.getElementById('chart-paths'), { type: 'line', data: { labels: xLabels, datasets: pathDs }, options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { ticks: { maxTicksLimit: 6, color: MUTED }, grid: { display: false } }, y: { ticks: { color: MUTED, callback: v => fmt$(v) }, grid: { color: '#e5e5ea' } } } } });
+      destroyChart('chart-median');
+      chartInstances['chart-median'] = new Chart(document.getElementById('chart-median'), { type: 'line', data: { labels: xLabels, datasets: [{ label: 'Decay Model', data: decayMedianPath, borderColor: GOLD, borderWidth: 2, pointRadius: 0, tension: 0.3 }, { label: 'Flat Drift', data: flatMedianPath, borderColor: BLUE, borderWidth: 2, borderDash: [5, 3], pointRadius: 0, tension: 0.3 }, { label: 'S&P 8%/yr', data: xLabels.map((_, i) => s0 * Math.pow(1.08, i / displaySteps * Tyrs)), borderColor: GREEN, borderWidth: 1.5, borderDash: [3, 3], pointRadius: 0, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#1d1d1f', boxWidth: 20, font: { size: 11 } } } }, scales: { x: { ticks: { maxTicksLimit: 6, color: MUTED }, grid: { display: false } }, y: { ticks: { color: MUTED, callback: v => fmt$(v) }, grid: { color: '#e5e5ea' } } } } });
+      const pcts = [5, 10, 25, 50, 75, 90, 95], tags = ['Extreme Bear', 'Bear', 'Below Avg', 'Median', 'Above Avg', 'Bull', 'Strong Bull'], tagCls = ['tag-bear', 'tag-bear', 'tag-base', 'tag-base', 'tag-base', 'tag-bull', 'tag-strong'];
+      const tbody = document.querySelector('#svj-pct-table tbody'); tbody.innerHTML = '';
+      pcts.forEach((p, i) => { const price = sortedPercentile(terminals, p), totalRet = (price - s0) / s0, annRet = Math.pow(price / s0, 1 / Tyrs) - 1; const tr = document.createElement('tr'); tr.innerHTML = `<td>${p}th</td><td>${fmt$(price)}</td><td style="color:${totalRet >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtPct(totalRet)}</td><td style="color:${annRet >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtAnn(annRet)}</td><td><span class="tag ${tagCls[i]}">${tags[i]}</span></td>`; tbody.appendChild(tr); });
+      document.getElementById('pdf-svj-stats').innerHTML = `<div class="pdf-stat"><div class="pdf-stat-val">${fmt$(median)}</div><div class="pdf-stat-lbl">Median (50th pct)</div></div><div class="pdf-stat"><div class="pdf-stat-val">${pBeatSP.toFixed(1)}%</div><div class="pdf-stat-lbl">Beat S&P 8%/yr</div></div><div class="pdf-stat"><div class="pdf-stat-val">${pBelowS0.toFixed(1)}%</div><div class="pdf-stat-lbl">Below Entry</div></div>`;
+    }
+
+    let dcfResults = null;
+    async function runDCF() {
+      const btn = document.getElementById('run-dcf-btn'); btn.disabled = true;
+      const revTTM = +document.getElementById('d-rev').value * 1e9, shares = +document.getElementById('d-shares').value * 1e9, netCash = +(document.getElementById('d-netcash')?.value || 0) * 1e9;
+      const mg = +document.getElementById('d-mg').value, sg = +document.getElementById('d-sg').value, mm = +document.getElementById('d-mm').value, sm = +document.getElementById('d-sm').value;
+      const mf = +document.getElementById('d-mf').value, sf = +document.getElementById('d-sf').value, mw = +document.getElementById('d-mw').value, sw = +document.getElementById('d-sw').value;
+      const mtg = +document.getElementById('d-mtg').value, stg = +document.getElementById('d-stg').value;
+      const N = 100000, batchSize = 5000, ivArr = new Float64Array(N);
+      document.getElementById('dcf-progress').style.display = 'block'; document.getElementById('dcf-results').style.display = 'none';
+      const pFill = document.getElementById('dcf-progress-fill'), pText = document.getElementById('dcf-progress-text');
+      for (let b = 0; b < Math.ceil(N / batchSize); b++) {
+        const start = b * batchSize, end = Math.min(start + batchSize, N);
+        for (let i = start; i < end; i++) {
+          const [wz] = boxMuller(), wacc = clip(mw + sw * wz, 0.04, 0.18); const [tgz] = boxMuller(), tg = clip(mtg + stg * tgz, 0.01, 0.05);
+          let rev = revTTM, pv = 0, lastFCF = 0;
+          let prevGz = boxMuller()[0], prevMz = boxMuller()[0];
+          const phi_g = +(document.getElementById('d-phi-g')?.value || 0.70), phi_m = 0.60;
+          for (let t = 1; t <= 10; t++) {
+            const muGt = mg + (mtg - mg) * (t - 1) / 9;
+            const [rawGz] = boxMuller();
+            const currentGz = phi_g * prevGz + Math.sqrt(1 - phi_g * phi_g) * rawGz;
+            const gRate = clip(muGt + sg * currentGz, -0.30, 0.80);
+            rev *= (1 + gRate); prevGz = currentGz;
+            const [rawMz] = boxMuller();
+            const currentMz = phi_m * prevMz + Math.sqrt(1 - phi_m * phi_m) * rawMz;
+            const margin = clip(mm + sm * currentMz, 0, 0.60);
+            const ni = rev * margin; prevMz = currentMz;
+            const [fz] = boxMuller(), fcfConv = clip(mf + sf * fz, 0.3, 1.2);
+            const fcf = ni * fcfConv;
+            pv += fcf / Math.pow(1 + wacc, t); lastFCF = fcf;
+          }
+          const effectiveWacc = Math.max(wacc, tg + 0.005); const tv = lastFCF * (1 + tg) / (effectiveWacc - tg); let pvTV = tv / Math.pow(1 + wacc, 10);
+          ivArr[i] = (pv + pvTV + netCash) / shares;
+        }
+        const pct = (end / N * 100).toFixed(1); pFill.style.width = pct + '%'; pText.textContent = `Running… ${end.toLocaleString()} / ${N.toLocaleString()} (${pct}%)`;
+        await new Promise(r => setTimeout(r, 0));
+      }
+      ivArr.sort(); dcfResults = { ivArr, mw, sw, mg, sg, mm, sm, mtg, stg }; renderDCF();
+      pFill.style.width = '100%'; pText.textContent = 'Complete!'; setTimeout(() => { document.getElementById('dcf-progress').style.display = 'none'; }, 1000);
+      document.getElementById('dcf-results').style.display = 'block'; btn.disabled = false;
+    }
+
+    function renderDCF() {
+      const { ivArr, mw, sw, mg, sg, mm, sm, mtg, stg } = dcfResults;
+      const N = ivArr.length, median = sortedPercentile(ivArr, 50), mean = ivArr.reduce((a, b) => a + b, 0) / N;
+      const pMoS = ivArr.filter(v => v > S0 * 1.25).length / N * 100, premium = (median - S0) / S0;
+      document.getElementById('dcf-stats').innerHTML = `<div class="stat-card"><div class="stat-label">Median Intrinsic Value</div><div class="stat-value">${fmt$(median)}</div></div><div class="stat-card blue"><div class="stat-label">Mean Intrinsic Value</div><div class="stat-value">${fmt$(mean)}</div></div><div class="stat-card ${premium >= 0 ? 'green' : 'red'}"><div class="stat-label">vs Current (${fmt$(S0)})</div><div class="stat-value">${fmtPct(premium)}</div></div><div class="stat-card ${pMoS > 50 ? 'green' : 'red'}"><div class="stat-label">Margin of Safety (25%)</div><div class="stat-value">${pMoS.toFixed(1)}%</div><div class="stat-sub">IV > ${fmt$(S0 * 1.25)}</div></div>`;
+      const p2 = sortedPercentile(ivArr, 2), p98 = sortedPercentile(ivArr, 98), bins = 80, binW = (p98 - p2) / bins, counts = new Array(bins).fill(0), colors = [];
+      ivArr.forEach(v => { if (v < p2 || v > p98) return; const b = Math.min(Math.floor((v - p2) / binW), bins - 1); counts[b]++; });
+      const histLabels = []; for (let i = 0; i < bins; i++) { const mid = p2 + (i + 0.5) * binW; histLabels.push(fmt$(mid)); colors.push(mid < S0 ? RED : mid < S0 * 1.25 ? GOLD : GREEN); }
+      destroyChart('chart-dcf-hist');
+      chartInstances['chart-dcf-hist'] = new Chart(document.getElementById('chart-dcf-hist'), { type: 'bar', data: { labels: histLabels, datasets: [{ data: counts, backgroundColor: colors, borderWidth: 0, barPercentage: 1.0, categoryPercentage: 1.0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { maxTicksLimit: 8, color: MUTED }, grid: { display: false } }, y: { ticks: { color: MUTED }, grid: { color: '#e5e5ea' } } } } });
+      const pcts = [10, 25, 50, 75, 90], tbody = document.querySelector('#dcf-pct-table tbody'); tbody.innerHTML = '';
+      pcts.forEach(p => { const iv = sortedPercentile(ivArr, p), diff = (iv - S0) / S0; const tr = document.createElement('tr'); tr.innerHTML = `<td>${p}th</td><td>${fmt$(iv)}</td><td style="color:${diff >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtPct(diff)}</td>`; tbody.appendChild(tr); });
+      const baseMedian = median;
+      const sensitivities = [{ label: 'WACC', loImpact: baseMedian * (mw / Math.min(mw + sw, 0.18)) - baseMedian, hiImpact: baseMedian * (mw / Math.max(mw - sw, 0.04)) - baseMedian }, { label: 'Revenue Growth', loImpact: baseMedian * (1 + (mg - sg - mg) * 0.4) - baseMedian, hiImpact: baseMedian * (1 + (mg + sg - mg) * 0.4) - baseMedian }, { label: 'Net Margin', loImpact: baseMedian * ((mm - sm) / Math.max(mm, 0.01)) - baseMedian, hiImpact: baseMedian * ((mm + sm) / Math.max(mm, 0.01)) - baseMedian }, { label: 'Terminal Growth', loImpact: baseMedian * 0.82 - baseMedian, hiImpact: baseMedian * 1.38 - baseMedian }];
+      const maxImpact = Math.max(...sensitivities.map(s => Math.max(Math.abs(s.loImpact), Math.abs(s.hiImpact))));
+      document.getElementById('tornado-chart').innerHTML = sensitivities.sort((a, b) => Math.max(Math.abs(b.loImpact), Math.abs(b.hiImpact)) - Math.max(Math.abs(a.loImpact), Math.abs(a.hiImpact))).map(s => { const pp = Math.abs(s.hiImpact) / maxImpact * 140, np = Math.abs(s.loImpact) / maxImpact * 140; return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:11px"><div style="width:140px;color:var(--muted);text-align:right">${s.label}</div><div style="display:flex;width:300px"><div style="width:150px;display:flex;justify-content:flex-end"><div style="background:${s.loImpact <= 0 ? RED : GREEN};height:18px;width:${np}px;border-radius:3px 0 0 3px"></div></div><div style="width:2px;background:var(--border)"></div><div style="width:150px"><div style="background:${s.hiImpact >= 0 ? GREEN : RED};height:18px;width:${pp}px;border-radius:0 3px 3px 0"></div></div></div><div style="color:var(--muted);font-size:10px">${fmt$(s.loImpact)} / +${fmt$(Math.abs(s.hiImpact))}</div></div>`; }).join('');
+      document.getElementById('pdf-dcf-stats').innerHTML = `<div class="pdf-stat"><div class="pdf-stat-val">${fmt$(median)}</div><div class="pdf-stat-lbl">Median IV</div></div><div class="pdf-stat"><div class="pdf-stat-val">${fmtPct(premium)}</div><div class="pdf-stat-lbl">vs Market Price</div></div><div class="pdf-stat"><div class="pdf-stat-val">${pMoS.toFixed(1)}%</div><div class="pdf-stat-lbl">Margin of Safety 25%</div></div>`;
+    }
+
+    let peResults = null;
+    async function runPE() {
+      const btn = document.getElementById('run-pe-btn'); btn.disabled = true;
+      const pe0 = +document.getElementById('pe-cur').value, peBear = +document.getElementById('pe-bear').value, peBase = +document.getElementById('pe-base').value, peBull = +document.getElementById('pe-bull').value;
+      const kpe = +document.getElementById('pe-kappa').value, spe = +document.getElementById('pe-sig').value, mEps = +document.getElementById('pe-meps').value, sEps = +document.getElementById('pe-seps').value, eps0 = +document.getElementById('pe-eps0').value;
+      const N = 50000, batchSize = 5000, years = 10;
+      const scenarios = [{ name: 'Bear', target: peBear, color: RED }, { name: 'Base', target: peBase, color: GOLD }, { name: 'Bull', target: peBull, color: GREEN }];
+      document.getElementById('pe-progress').style.display = 'block'; document.getElementById('pe-results').style.display = 'none';
+      const pFill = document.getElementById('pe-progress-fill'), pText = document.getElementById('pe-progress-text');
+      const results = [];
+      for (let si = 0; si < 3; si++) {
+        const sc = scenarios[si], finalPrices = new Float64Array(N);
+        const peMeansArr = new Array(years + 1).fill(0), peSumSq = new Array(years + 1).fill(0); peMeansArr[0] = pe0;
+        const epsYear = Array.from({ length: years + 1 }, () => new Float32Array(N));
+        for (let b = 0; b < Math.ceil(N / batchSize); b++) {
+          const start = b * batchSize, end = Math.min(start + batchSize, N);
+          for (let i = start; i < end; i++) {
+            let eps = eps0, pe = pe0; epsYear[0][i] = eps;
+            const rho_pe_eps = +(document.getElementById('pe-rho')?.value || 0.65), rho2_pe = Math.sqrt(1 - rho_pe_eps * rho_pe_eps);
+            for (let t = 1; t <= years; t++) {
+              const [z1, zIndep] = boxMuller();
+              const ez = z1, eg = clip(mEps + sEps * ez, -0.40, 0.60); eps *= (1 + eg);
+              const pz = rho_pe_eps * z1 + rho2_pe * zIndep;
+              pe = Math.max(5, pe + kpe * (sc.target - pe) * 1 + spe * pz * 1);
+              epsYear[t][i] = eps; peMeansArr[t] += pe; peSumSq[t] += pe * pe;
+            }
+            finalPrices[i] = eps * pe;
+          }
+          const pct = ((si * N + end) / (3 * N) * 100).toFixed(1); pFill.style.width = pct + '%'; pText.textContent = `Scenario ${si + 1}/3: ${end.toLocaleString()} (${pct}%)`;
+          await new Promise(r => setTimeout(r, 0));
+        }
+        finalPrices.sort(); const medF = sortedPercentile(finalPrices, 50), pProfit = finalPrices.filter(v => v > S0).length / N * 100;
+        const peMeans = [pe0], peSigmas = [0]; for (let t = 1; t <= years; t++) { const m = peMeansArr[t] / N; peMeans.push(m); peSigmas.push(Math.sqrt(Math.max(0, peSumSq[t] / N - m * m))); }
+        const epsMedians = [eps0], epsP10arr = [eps0], epsP90arr = [eps0];
+        for (let t = 1; t <= years; t++) { const yr = Array.from(epsYear[t]); yr.sort((a, b) => a - b); const fa = new Float64Array(yr); epsMedians.push(sortedPercentile(fa, 50)); epsP10arr.push(sortedPercentile(fa, 10)); epsP90arr.push(sortedPercentile(fa, 90)); }
+        const yearMedians = [S0]; for (let t = 1; t <= years; t++)yearMedians.push(epsMedians[t] * peMeans[t]);
+        results.push({ name: sc.name, color: sc.color, finalPrices, medF, pProfit, yearMedians, peMeans, peSigmas, epsMedians, epsP10arr, epsP90arr });
+      }
+      peResults = { results }; renderPE(); pFill.style.width = '100%'; pText.textContent = 'Complete!'; setTimeout(() => { document.getElementById('pe-progress').style.display = 'none'; }, 1000); document.getElementById('pe-results').style.display = 'block'; btn.disabled = false;
+    }
+
+    function renderPE() {
+      const { results } = peResults;
+      const p1 = sortedPercentile(results[0].finalPrices, 2), p99 = sortedPercentile(results[2].finalPrices, 98), bins = 60, binW = (p99 - p1) / bins;
+      const histDs = results.map(r => { const counts = new Array(bins).fill(0); r.finalPrices.forEach(v => { if (v < p1 || v > p99) return; const b = Math.min(Math.floor((v - p1) / binW), bins - 1); counts[b]++; }); return { label: r.name, data: counts, backgroundColor: r.color + '99', borderColor: r.color, borderWidth: 1, barPercentage: 1.0, categoryPercentage: 1.0 }; });
+      const histLabels = []; for (let i = 0; i < bins; i++)histLabels.push(fmt$(p1 + (i + 0.5) * binW));
+      destroyChart('chart-pe-hist'); chartInstances['chart-pe-hist'] = new Chart(document.getElementById('chart-pe-hist'), { type: 'bar', data: { labels: histLabels, datasets: histDs }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#1d1d1f', font: { size: 11 } } } }, scales: { x: { ticks: { maxTicksLimit: 8, color: MUTED }, grid: { display: false } }, y: { ticks: { color: MUTED }, grid: { color: '#e5e5ea' } } } } });
+      const yearLabels = Array.from({ length: 11 }, (_, i) => 'Yr ' + i);
+      destroyChart('chart-pe-paths'); chartInstances['chart-pe-paths'] = new Chart(document.getElementById('chart-pe-paths'), { type: 'line', data: { labels: yearLabels, datasets: results.map(r => ({ label: r.name, data: r.yearMedians, borderColor: r.color, borderWidth: 2, pointRadius: 3, pointBackgroundColor: r.color, tension: 0.3 })) }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#1d1d1f', font: { size: 11 } } } }, scales: { x: { ticks: { color: MUTED }, grid: { display: false } }, y: { ticks: { color: MUTED, callback: v => fmt$(v) }, grid: { color: '#e5e5ea' } } } } });
+      destroyChart('chart-pe-ratio'); const peDs = []; results.forEach(r => { peDs.push({ label: r.name + ' Mean', data: r.peMeans, borderColor: r.color, borderWidth: 2, pointRadius: 2, tension: 0.3, fill: false }); peDs.push({ label: '+1σ', data: r.peMeans.map((m, i) => m + r.peSigmas[i]), borderColor: r.color + '44', borderWidth: 1, borderDash: [3, 3], pointRadius: 0, tension: 0.3, fill: false }); peDs.push({ label: '-1σ', data: r.peMeans.map((m, i) => m - r.peSigmas[i]), borderColor: r.color + '44', borderWidth: 1, borderDash: [3, 3], pointRadius: 0, tension: 0.3, fill: false }); });
+      chartInstances['chart-pe-ratio'] = new Chart(document.getElementById('chart-pe-ratio'), { type: 'line', data: { labels: yearLabels, datasets: peDs }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: MUTED }, grid: { display: false } }, y: { ticks: { color: MUTED }, grid: { color: '#1e2328' } } } } });
+      const tbody = document.querySelector('#pe-summary-table tbody'); tbody.innerHTML = ''; results.forEach(r => { const totalRet = (r.medF - S0) / S0, annRet = Math.pow(r.medF / S0, 1 / 10) - 1; const tr = document.createElement('tr'); tr.innerHTML = `<td style="color:${r.color}">${r.name}</td><td>${fmt$(r.medF)}</td><td style="color:${totalRet >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtPct(totalRet)}</td><td style="color:${annRet >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtAnn(annRet)}</td><td>${r.pProfit.toFixed(1)}%</td>`; tbody.appendChild(tr); });
+      const base = results[1]; destroyChart('chart-eps'); chartInstances['chart-eps'] = new Chart(document.getElementById('chart-eps'), { type: 'line', data: { labels: yearLabels, datasets: [{ label: 'EPS Median', data: base.epsMedians, borderColor: GOLD, borderWidth: 2, pointRadius: 3, pointBackgroundColor: GOLD, tension: 0.3 }, { label: 'EPS 90th', data: base.epsP90arr, borderColor: GREEN + '99', borderWidth: 1, borderDash: [4, 3], pointRadius: 0, tension: 0.3 }, { label: 'EPS 10th', data: base.epsP10arr, borderColor: RED + '99', borderWidth: 1, borderDash: [4, 3], pointRadius: 0, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#d4cfc8', font: { size: 11 } } } }, scales: { x: { ticks: { color: MUTED }, grid: { display: false } }, y: { ticks: { color: MUTED, callback: v => fmt$(v) }, grid: { color: '#1e2328' } } } } });
+      document.getElementById('pdf-pe-stats').innerHTML = results.map(r => `<div class="pdf-stat"><div class="pdf-stat-val">${fmt$(r.medF)}</div><div class="pdf-stat-lbl">${r.name} Median</div></div>`).join('');
+    }
+
+    async function exportPDF() {
+      if (!svjResults && !dcfResults && !peResults) { alert('Run at least one model first.'); return; }
+      const { jsPDF } = window.jspdf; const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const c = document.getElementById('pdf-export-container'); c.style.display = 'block';
+      const pages = c.querySelectorAll('.pdf-page');
+      for (let i = 0; i < pages.length; i++) { const canvas = await html2canvas(pages[i], { scale: 2, backgroundColor: '#ffffff', useCORS: true }); const img = canvas.toDataURL('image/jpeg', 0.95); if (i > 0) pdf.addPage(); const w = pdf.internal.pageSize.getWidth(), h = (canvas.height * w) / canvas.width; pdf.addImage(img, 'JPEG', 0, 0, w, Math.min(h, pdf.internal.pageSize.getHeight())); pdf.setFontSize(8); pdf.setTextColor(150); pdf.text('FOR EDUCATIONAL USE ONLY — Not financial advice.', w / 2, pdf.internal.pageSize.getHeight() - 8, { align: 'center' }); }
+      c.style.display = 'none'; pdf.save('GOOG_Financial_Analysis_Feb2026.pdf');
+    }
+  </script>
+</body>
+
+</html>
